@@ -35,6 +35,11 @@ def deploy(c):
 
     # 先停止应用
     with c.cd(supervisor_conf_path):
+        cmd = 'supervisorctl stop {}'.format(supervisor_program_name)
+        c.run(cmd)
+
+    # 进入项目根目录，从 Git 拉取最新的代码
+    with c.cd(project_root_path):
         cmd = 'git pull'
         responders = _get_github_auth_responders()
         c.run(cmd, watchers=responders)
@@ -44,7 +49,7 @@ def deploy(c):
         c.run('source activate Django')
         c.run('pip install -r requirements.txt')
         c.run('python manage.py migrate')
-        c.run('python collectstatic --noinput')
+        c.run('python manage.py collectstatic --noinput')
 
     # 重新启动应用
     with c.cd(supervisor_conf_path):
